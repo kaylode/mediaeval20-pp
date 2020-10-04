@@ -73,7 +73,7 @@ class Trainer(nn.Module):
             loss, loss_dict = self.model.training_step(batch)
 
 
-            if loss == 0 or not torch.isfinite(loss):
+            if loss.item() == 0 or not torch.isfinite(loss):
                 continue
 
             loss.backward()

@@ -61,8 +61,8 @@ class Classifier(BaseModel):
         outputs = self(inputs) #batchsize, label_dim
         loss = self.criterion(outputs, targets)
 
-        metric_dict = self.update_metrics(outputs, targets)
-        
+        #metric_dict = self.update_metrics(outputs, targets)
+        metric_dict = {}
         return loss , metric_dict
 
     def forward_test(self):
