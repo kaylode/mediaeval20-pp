@@ -165,11 +165,11 @@ class Trainer(nn.Module):
         print('==')
         print('==========================================================================')
         
-
+        global max_score
         if self.checkpoint.save_best:
             if epoch_loss['SSIM'] > max_score:
                 max_score = epoch_loss['SSIM']
-                self.checkpoint.save(self.model, epoch = epoch, best = max_score)
+                self.checkpoint.save(self.model, epoch = self.epoch, best = max_score)
             
         log_dict = {"Validation Loss/Epoch" : epoch_loss['T'], 
                     "Validation SSIM/Epoch" : epoch_loss['SSIM']}

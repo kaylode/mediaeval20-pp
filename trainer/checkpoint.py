@@ -38,7 +38,7 @@ class Checkpoint():
             model_path +='_interrupted'
             
         weights = {
-            'model': model.model.state_dict(),
+            'model': model.state_dict(),
             'optimizer': model.optimizer.state_dict(),
         }
 
