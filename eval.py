@@ -1,21 +1,23 @@
 from utils.getter import *
 import argparse
-
+from models.BIQA_model.biqa import model_qa
+import matplotlib.pyplot as plt
 torch.backends.cudnn.fastest = True
 torch.backends.cudnn.benchmark = True
 
 def visualize_test(model, bi, gts, imgs, scores, batch_idx, output_path):
 
-    gts = torch.stack([i for i in gts]).to(device)
+    gts = torch.stack([i for i in gts]).to(imgs.device)
 
     gt_scores = bi(gts).cpu().numpy()
     pred_scores = bi(imgs).detach().cpu().numpy()
 
-    for idx, gt, pred, gt_score, pred_score in enumerate(zip(gts,imgs,gt_scores,pred_scores)):
+    
+    for idx, (gt, pred, gt_score, pred_score) in enumerate(zip(gts,imgs,gt_scores,pred_scores)):
         img_show = denormalize(gt.detach().cpu())
         img_show2 = denormalize(pred.detach().cpu())
 
-        plt.figure(figsize=(10,10))
+        fig = plt.figure(figsize=(8,8))
         plt.subplot(1,2,1)
         plt.title(gt_score[0])
         plt.axis('off')
@@ -25,6 +27,7 @@ def visualize_test(model, bi, gts, imgs, scores, batch_idx, output_path):
         plt.title(pred_score[0])
         plt.axis('off')
         plt.savefig(os.path.join(output_path, f'batch{batch_idx}_{idx}.png'))
+        plt.close(fig)
    
 
 
@@ -34,7 +37,7 @@ def eval(args):
     if args.images is not None:
         input_path, output_path = args.images.split(':')
         valset = ImageFolder(input_path)
-        if len(os.listdir(args.images)) > 10:
+        if len(os.listdir(input_path)) > 10:
             batch_size = 4
         else:
             batch_size = 1 
@@ -54,17 +57,16 @@ def eval(args):
         model.inference()
         
         bi = model_qa(num_classes=1).to(device)
-        bi.load_state_dict(torch.load('models/BIQA_model/KonCept512.pth'))
+        bi.load_state_dict(torch.load('/content/main/models/BIQA_model/KonCept512.pth'))
         bi.eval()
         for param in bi.parameters():
             param.requires_grad = False
         
         with torch.no_grad():
-            for idx, batch in tqdm(enumerate(valloader)):
+            for idx, batch in enumerate(tqdm(valloader)):
                 inputs = batch['imgs'].to(device)
-                targets = batch['labels'].to(device)
                 outputs, scores = model(inputs)
-                visualize_test(model, bi, targets, inputs, scores, idx, output_path)
+                visualize_test(model, bi, inputs, outputs, scores, idx, output_path)
     
     
     
@@ -80,5 +82,5 @@ if __name__ == "__main__":
                         help='checkpoint to resume')
 
     args = parser.parse_args()        
-    train(args)
+    eval(args)
     
