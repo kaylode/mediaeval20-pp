@@ -29,4 +29,5 @@ this repo
 ```
 
 ## References:
-SSIM Loss: https://github.com/Po-Hsun-Su/pytorch-ssim
+- SSIM Loss: https://github.com/Po-Hsun-Su/pytorch-ssim
+- U Net: https://github.com/bigmb/Unet-Segmentation-Pytorch-Nest-of-Unets
