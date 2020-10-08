@@ -27,3 +27,6 @@ this repo
 ## Inference: #TODO
 ```
 ```
+
+## References:
+SSIM Loss: https://github.com/Po-Hsun-Su/pytorch-ssim
