@@ -11,9 +11,12 @@ from .BIQA_model.biqa import BIQA
 from losses.ssimloss import SSIM
 
 class FullModel(BaseModel):
-    def __init__(self, **kwargs):
+    def __init__(self, alpha=0.1, hard_label=0, **kwargs):
         super().__init__(**kwargs)
         self.model_name = 'full_model'
+        self.alpha = alpha
+        self.hard_label = hard_label
+
         self.reconstruct = U_Net(3,3)
         self.evalute = BIQA()
 
@@ -63,9 +66,9 @@ class FullModel(BaseModel):
         else:
             reconstructed_loss = -self.ssim_loss(reconstructed, inputs) + self.mae_loss(reconstructed, inputs)
 
-            fake_labels = torch.zeros(evaluated.shape).to(evaluated.device)
+            fake_labels = (self.hard_label*torch.ones(evaluated.shape)).to(evaluated.device)
             attack_loss = self.mae_loss(evaluated, fake_labels)
-            total_loss = 0.2*attack_loss + reconstructed_loss
+            total_loss = self.alpha*attack_loss + reconstructed_loss
             return  total_loss, {'SSIM': abs(reconstructed_loss.item()), 'MAE': attack_loss.item(), 'T': abs(total_loss.item())}
 
     

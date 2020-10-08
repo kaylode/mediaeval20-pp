@@ -150,7 +150,7 @@ class Trainer(nn.Module):
         end_time = time.time()
         running_time = end_time - start_time
         metric_dict.update(metrics)
-        self.model.reset_metrics()
+        #self.model.reset_metrics()
 
         for key in epoch_loss.keys():
             epoch_loss[key] /= len(self.valloader)

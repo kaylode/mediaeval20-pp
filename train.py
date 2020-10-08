@@ -17,6 +17,8 @@ def train(args):
     valloader = data.DataLoader(valset, batch_size=args.batch_size, collate_fn=trainset.collate_fn, shuffle=False, pin_memory=True, num_workers=4)
 
     model = FullModel(
+                    hard_label=args.hard_label,
+                    alpha=args.alpha,
                     optimizer= torch.optim.Adam,
                     optim_params = {'lr': 1e-3},
                     criterion= None, 
@@ -61,7 +63,10 @@ if __name__ == "__main__":
                         help='number of epochs to train')
     parser.add_argument('--resume', type=str, default= None,
                         help='checkpoint to resume')
-
+    parser.add_argument('--alpha', type=float, default= 0.1,
+                        help='alpha for weighting regression loss')
+    parser.add_argument('--hard_label', type=float, default= 0,
+                        help='hard code label to attack')
     args = parser.parse_args()        
     train(args)
     
