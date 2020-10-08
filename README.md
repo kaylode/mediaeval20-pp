@@ -18,6 +18,9 @@ this repo
 │       └───pp2020_dev
 ```
 
+## Method:
+
+<img src="./images/pipeline.PNG" width="700">
 
 ## Train full model:
 
