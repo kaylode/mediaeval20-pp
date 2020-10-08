@@ -82,7 +82,6 @@ class Trainer(nn.Module):
 
             loss.backward()
             
-            # 
             if self.clip_grad is not None:
                 clip_gradient(self.optimizer, self.clip_grad)
 
@@ -105,6 +104,7 @@ class Trainer(nn.Module):
                 loss_string = '{}'.format(running_loss)[1:-1].replace("'",'').replace(",",' ||')
                 print("[{}|{}] [{}|{}] || {} || Time: {:10.4f}s".format(self.epoch, self.num_epochs, iters, self.num_iters,loss_string, running_time))
                 self.logging({"Training Loss/Batch" : running_loss['T']})
+                self.logging({"Training SSIM/Batch" : running_loss['SSIM']})
                 running_loss = {}
                 running_time = 0
 
@@ -171,7 +171,9 @@ class Trainer(nn.Module):
                 max_score = epoch_loss['SSIM']
                 self.checkpoint.save(self.model, epoch = epoch, best = max_score)
             
-        log_dict = {"Validation Loss/Epoch" : epoch_loss['T']}
+        log_dict = {"Validation Loss/Epoch" : epoch_loss['T'], 
+                    "Validation SSIM/Epoch" : epoch_loss['SSIM']}
+
         log_dict.update(metric_dict)
         self.logging(log_dict)
         
