@@ -1,5 +1,8 @@
 # Pixel Privacy 2020
 
+- Task description: https://multimediaeval.github.io/editions/2020/tasks/pixelprivacy/
+- Koniq-10k dataset: http://database.mmsp-kn.de/koniq-10k-database.html
+
 ## File Structure:
 
 ```
