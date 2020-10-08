@@ -13,7 +13,7 @@ from losses.ssimloss import SSIM
 class FullModel(BaseModel):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.name = 'full_model'
+        self.model_name = 'full_model'
         self.reconstruct = U_Net(3,3)
         self.evalute = BIQA()
 
