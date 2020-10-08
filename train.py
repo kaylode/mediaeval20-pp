@@ -28,7 +28,7 @@ def train(args):
     trainer = Trainer(model,
                      trainloader, 
                      valloader,
-                     checkpoint = Checkpoint(save_per_epoch=5, path = args.saved_path),
+                     checkpoint = Checkpoint(save_per_epoch=0, save_best = args.save_best, path = args.saved_path),
                      logger = Logger(log_dir=args.log_path),
                      scheduler = StepLR(model.optimizer, step_size=30, gamma=0.1),
                      evaluate_per_epoch = args.val_epoch)
