@@ -22,7 +22,7 @@ this repo
 ## Train full model:
 
 ```
-!python train.py --path='/content/main/datasets/koniq' --batch_size=4 --num_epochs=100 --resume='/content/drive/My Drive/weights/Pixel Privacy/unet_ssim/unet_ssim_6_    0.8884.pth'
+python train.py --path='/content/main/datasets/koniq' --batch_size=4 --num_epochs=100 --resume='/content/drive/My Drive/weights/Pixel Privacy/unet_ssim/unet_ssim_6_    0.8884.pth'
 ```
 
 ## Inference: #TODO
