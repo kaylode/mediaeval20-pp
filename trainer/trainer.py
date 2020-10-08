@@ -9,6 +9,8 @@ from utils.utils import clip_gradient
 import time
 
 
+max_score = 0
+
 class Trainer(nn.Module):
     def __init__(self, 
                 model, 
@@ -51,8 +53,10 @@ class Trainer(nn.Module):
                     
                 if self.scheduler is not None:
                     self.scheduler.step()
-                if (epoch % self.checkpoint.save_per_epoch == 0 or epoch == num_epochs - 1):
-                    self.checkpoint.save(self.model, epoch = epoch)
+                
+                if not self.checkpoint.save_best:
+                    if (epoch % self.checkpoint.save_per_epoch == 0 or epoch == num_epochs - 1):
+                        self.checkpoint.save(self.model, epoch = epoch)
 
             except KeyboardInterrupt:   
                 self.checkpoint.save(self.model, epoch = epoch, interrupted = True)
@@ -100,7 +104,7 @@ class Trainer(nn.Module):
                     running_loss[key] = np.round(running_loss[key], 5)
                 loss_string = '{}'.format(running_loss)[1:-1].replace("'",'').replace(",",' ||')
                 print("[{}|{}] [{}|{}] || {} || Time: {:10.4f}s".format(self.epoch, self.num_epochs, iters, self.num_iters,loss_string, running_time))
-                self.logging({"Training Loss/Batch" : running_loss['T']/ self.print_per_iter,})
+                self.logging({"Training Loss/Batch" : running_loss['T']})
                 running_loss = {}
                 running_time = 0
 
@@ -151,6 +155,7 @@ class Trainer(nn.Module):
         for key in epoch_loss.keys():
             epoch_loss[key] /= len(self.valloader)
             epoch_loss[key] = np.round(epoch_loss[key], 5)
+
         loss_string = '{}'.format(epoch_loss)[1:-1].replace("'",'').replace(",",' ||')
         print()
         print("[{}|{}] || {} || Time: {:10.4f} s".format(self.epoch, self.num_epochs, loss_string, running_time))
@@ -159,8 +164,14 @@ class Trainer(nn.Module):
             print(metric +': ' + str(score), end = ' | ')
         print('==')
         print('==========================================================================')
+        
 
-        log_dict = {"Validation Loss/Epoch" : epoch_loss['T'] / len(self.valloader),}
+        if self.checkpoint.save_best:
+            if epoch_loss['SSIM'] > max_score:
+                max_score = epoch_loss['SSIM']
+                self.checkpoint.save(self.model, epoch = epoch, best = max_score)
+            
+        log_dict = {"Validation Loss/Epoch" : epoch_loss['T']}
         log_dict.update(metric_dict)
         self.logging(log_dict)
         
