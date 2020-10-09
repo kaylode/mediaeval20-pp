@@ -104,7 +104,7 @@ class Trainer(nn.Module):
                 loss_string = '{}'.format(running_loss)[1:-1].replace("'",'').replace(",",' ||')
                 print("[{}|{}] [{}|{}] || {} || Time: {:10.4f}s".format(self.epoch, self.num_epochs, iters, self.num_iters,loss_string, running_time))
                 self.logging({"Training Loss/Batch" : running_loss['T']})
-                self.logging({"Training SSIM/Batch" : running_loss['SSIM']})
+                self.logging({"Training SSIM/Batch" : running_loss['Reconstruction']})
                 running_loss = {}
                 running_time = 0
 
@@ -172,7 +172,7 @@ class Trainer(nn.Module):
                 self.checkpoint.save(self.model, epoch = self.epoch, best = max_score)
             
         log_dict = {"Validation Loss/Epoch" : epoch_loss['T'], 
-                    "Validation SSIM/Epoch" : epoch_loss['SSIM']}
+                    "Validation SSIM/Epoch" : epoch_loss['Reconstruction']}
 
         log_dict.update(metric_dict)
         self.logging(log_dict)

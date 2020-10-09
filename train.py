@@ -5,7 +5,7 @@ torch.backends.cudnn.fastest = True
 torch.backends.cudnn.benchmark = True
 
 def train(args):
-    
+    assert args.reconstruction_loss in ['ssim', 'msssim'], 'wrong reconstruction loss'
     trainset = ImageFolder(os.path.join(args.path, 'pp2020_dev'))
     valset = ImageFolder(os.path.join(args.path, 'pp2020_test'))
     print(trainset)
@@ -19,6 +19,7 @@ def train(args):
     model = FullModel(
                     hard_label=args.hard_label,
                     alpha=args.alpha,
+                    reconstruction_loss = args.reconstruction_loss,
                     optimizer= torch.optim.Adam,
                     optim_params = {'lr': 1e-3},
                     criterion= None, 
@@ -32,7 +33,7 @@ def train(args):
                      valloader,
                      checkpoint = Checkpoint(save_per_epoch=0, save_best = args.save_best, path = args.saved_path),
                      logger = Logger(log_dir=args.log_path),
-                     scheduler = StepLR(model.optimizer, step_size=30, gamma=0.1),
+                     scheduler = StepLR(model.optimizer, step_size=45, gamma=0.1),
                      evaluate_per_epoch = args.val_epoch)
 
     print(trainer)
@@ -67,6 +68,8 @@ if __name__ == "__main__":
                         help='alpha for weighting regression loss')
     parser.add_argument('--hard_label', type=float, default= 0,
                         help='hard code label to attack')
+    parser.add_argument('--reconstruction_loss', type=str, default= 'ssim',
+                        help='reconstruction loss, ssim or msssim')
     args = parser.parse_args()        
     train(args)
     
