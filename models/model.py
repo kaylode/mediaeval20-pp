@@ -54,9 +54,11 @@ class FullModel(BaseModel):
 
     def train(self):
         self.reconstruct.train()
+        self.inference_mode = False
     
     def eval(self):
         self.reconstruct.eval()
+        self.inference_mode = False
 
     def inference(self):
         self.inference_mode = True
@@ -106,6 +108,9 @@ class FullModel(BaseModel):
             targets = targets.to(self.device)
         loss = self(inputs) #batchsize, label_dim
         
+        self.inference()
+        outputs, _ = self(inputs)
+        metric_dict = self.update_metrics(outputs, targets)
+        self.eval()
 
-        metric_dict = {}
         return loss , metric_dict

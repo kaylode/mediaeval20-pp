@@ -150,7 +150,7 @@ class Trainer(nn.Module):
         end_time = time.time()
         running_time = end_time - start_time
         metric_dict.update(metrics)
-        #self.model.reset_metrics()
+        self.model.reset_metrics()
 
         for key in epoch_loss.keys():
             epoch_loss[key] /= len(self.valloader)
@@ -167,8 +167,8 @@ class Trainer(nn.Module):
         
         global max_score
         if self.checkpoint.save_best:
-            if epoch_loss['SSIM'] > max_score:
-                max_score = epoch_loss['SSIM']
+            if epoch_loss['Reconstruction'] > max_score:
+                max_score = epoch_loss['Reconstruction']
                 self.checkpoint.save(self.model, epoch = self.epoch, best = max_score)
             
         log_dict = {"Validation Loss/Epoch" : epoch_loss['T'], 
