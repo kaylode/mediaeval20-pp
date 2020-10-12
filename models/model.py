@@ -74,7 +74,7 @@ class FullModel(BaseModel):
             return reconstructed, evaluated
         else:
             #Source for this loss function: https://arxiv.org/pdf/1511.08861.pdf
-            if self.reconstruction_loss == 'ssim' or if self.reconstruction_loss == 'msssim':
+            if self.reconstruction_loss == 'ssim' or self.reconstruction_loss == 'msssim':
                 reconstructed_loss = 0.84 *(1 - self.ssim_loss(reconstructed, inputs)) + (1-0.84)*self.mae_loss(reconstructed, inputs) 
             elif self.reconstruction_loss == 'mse':
                 reconstructed_loss = self.mse_loss(reconstructed, inputs)
