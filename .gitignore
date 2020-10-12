@@ -5,8 +5,6 @@ datasets/__pycache__/__init__.cpython-38.pyc
 datasets/__pycache__/csv_classification.cpython-38.pyc
 datasets/__pycache__/detection.cpython-38.pyc
 datasets/__pycache__/image_classification.cpython-38.pyc
-*.jpg
-*.png
 *.pyc
 *.0
 *.pth

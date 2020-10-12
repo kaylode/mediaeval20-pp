@@ -12,7 +12,7 @@ from losses.ssimloss import SSIM
 from losses.ms_ssimloss import MSSSIM
 
 class FullModel(BaseModel):
-    def __init__(self, alpha=0.1, hard_label=0, reconstruction_loss = 'ssim', **kwargs):
+    def __init__(self, alpha=0.1, hard_label=0, reconstruction_loss = 'ssim',  **kwargs):
         super().__init__(**kwargs)
         self.model_name = '{}unet{}_{}'.format(alpha, hard_label, reconstruction_loss)
         self.alpha = alpha
@@ -20,11 +20,15 @@ class FullModel(BaseModel):
 
         self.reconstruct = U_Net(3,3)
         self.evalute = BIQA()
-
+        
+        self.reconstruction_loss = reconstruction_loss
         if reconstruction_loss == 'ssim':
             self.ssim_loss = SSIM()
-        else:
+        elif reconstruction_loss == 'msssim':
             self.ssim_loss = MSSSIM()
+        elif reconstruction_loss == 'mse':
+            self.mse_loss = nn.MSELoss()
+
         self.mae_loss = nn.SmoothL1Loss()
         self.inference_mode = False
         
@@ -70,9 +74,17 @@ class FullModel(BaseModel):
             return reconstructed, evaluated
         else:
             #Source for this loss function: https://arxiv.org/pdf/1511.08861.pdf
-            reconstructed_loss = 0.84 *(1 - self.ssim_loss(reconstructed, inputs)) + (1-0.84)*self.mae_loss(reconstructed, inputs) 
-
-            fake_labels = (self.hard_label*torch.ones(evaluated.shape)).to(evaluated.device)
+            if self.reconstruction_loss == 'ssim' or if self.reconstruction_loss == 'msssim':
+                reconstructed_loss = 0.84 *(1 - self.ssim_loss(reconstructed, inputs)) + (1-0.84)*self.mae_loss(reconstructed, inputs) 
+            elif self.reconstruction_loss == 'mse':
+                reconstructed_loss = self.mse_loss(reconstructed, inputs)
+            
+            if self.hard_label < 0:
+                fake_labels = (self.hard_label*torch.ones(evaluated.shape)).to(evaluated.device)
+            else:
+                targets = self.evalute(inputs)
+                fake_labels = (targets + self.hard_label)
+            
             attack_loss = self.mae_loss(evaluated, fake_labels)
             total_loss = self.alpha*attack_loss + reconstructed_loss
             return  total_loss, {'Reconstruction': abs(reconstructed_loss.item()), 'Regression': attack_loss.item(), 'T': abs(total_loss.item())}
