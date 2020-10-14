@@ -36,6 +36,10 @@ def eval(args):
     
     if args.images is not None:
         input_path, output_path = args.images.split(':')
+        
+        if not os.path.exists(output_path):
+            os.mkdir(output_path)
+
         valset = ImageFolder(input_path)
         if len(os.listdir(input_path)) > 10:
             batch_size = 4
@@ -57,7 +61,7 @@ def eval(args):
         model.inference()
         
         bi = model_qa(num_classes=1).to(device)
-        bi.load_state_dict(torch.load('/content/main/models/BIQA_model/KonCept512.pth'))
+        bi.load_state_dict(torch.load('/content/drive/My Drive/datasets/Pixel Privacy 2020/KonCept512.pth'))
         bi.eval()
         for param in bi.parameters():
             param.requires_grad = False

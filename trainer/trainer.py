@@ -176,9 +176,6 @@ class Trainer(nn.Module):
 
         log_dict.update(metric_dict)
         self.logging(log_dict)
-        
-    
-
 
     def logging(self, logs):
         tags = [l for l in logs.keys()]
