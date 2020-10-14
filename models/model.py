@@ -12,7 +12,7 @@ from losses.ssimloss import SSIM
 from losses.ms_ssimloss import MSSSIM
 
 class FullModel(BaseModel):
-    def __init__(self, alpha=0.1, hard_label=0, reconstruction_loss = 'ssim',  **kwargs):
+    def __init__(self, alpha=0.01, hard_label=0, reconstruction_loss = 'ssim_only',  **kwargs):
         super().__init__(**kwargs)
         self.model_name = '{}unet{}_{}'.format(alpha, hard_label, reconstruction_loss)
         self.alpha = alpha
@@ -22,7 +22,7 @@ class FullModel(BaseModel):
         self.evalute = BIQA()
         
         self.reconstruction_loss = reconstruction_loss
-        if reconstruction_loss == 'ssim':
+        if reconstruction_loss == 'ssim' or reconstruction_loss == 'ssim_only':
             self.ssim_loss = SSIM()
         elif reconstruction_loss == 'msssim':
             self.ssim_loss = MSSSIM()
@@ -78,7 +78,9 @@ class FullModel(BaseModel):
                 reconstructed_loss = 0.84 *(1 - self.ssim_loss(reconstructed, inputs)) + (1-0.84)*self.mae_loss(reconstructed, inputs) 
             elif self.reconstruction_loss == 'mse':
                 reconstructed_loss = self.mse_loss(reconstructed, inputs)
-            
+            elif self.reconstruction_loss == 'ssim_only':
+                reconstructed_loss = 1 - self.ssim_loss(reconstructed, inputs)
+
             if self.hard_label < 0:
                 fake_labels = (self.hard_label*torch.ones(evaluated.shape)).to(evaluated.device)
             else:
