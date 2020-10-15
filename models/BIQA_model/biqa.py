@@ -35,7 +35,7 @@ class BIQA(nn.Module):
     def __init__(self):
         super().__init__()
         self.net = model_qa(num_classes = 1)
-        self.net.load_state_dict(torch.load('/content/drive/My Drive/datasets/Pixel Privacy 2020/KonCept512.pth'))
+        self.net.load_state_dict(torch.load('models\BIQA_model\KonCept512.pth'))
 
         for param in self.net.parameters():
             param.requires_grad = False
