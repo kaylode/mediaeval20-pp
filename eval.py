@@ -16,7 +16,7 @@ def visualize_test(model, bi, gts, imgs, scores, batch_idx, output_path):
     for idx, (gt, pred, gt_score, pred_score) in enumerate(zip(gts,imgs,gt_scores,pred_scores)):
         img_show = denormalize(gt.detach().cpu())
         img_show2 = denormalize(pred.detach().cpu())
-
+        score = np.round(pred_score[0], 4)
         fig = plt.figure(figsize=(8,8))
         plt.subplot(1,2,1)
         plt.title(gt_score[0])
@@ -24,9 +24,9 @@ def visualize_test(model, bi, gts, imgs, scores, batch_idx, output_path):
         plt.imshow(img_show)
         plt.subplot(1,2,2)
         plt.imshow(img_show2)
-        plt.title(pred_score[0])
+        plt.title(score)
         plt.axis('off')
-        plt.savefig(os.path.join(output_path, f'batch{batch_idx}_{idx}.png'))
+        plt.savefig(os.path.join(output_path, f'[{score}]_batch{batch_idx}_{idx}.png'))
         plt.close(fig)
    
 def plot_score(scores_list, output_path, figsize = (15,15)):
@@ -40,6 +40,9 @@ def plot_score(scores_list, output_path, figsize = (15,15)):
     cnt_dict = {k: v for k, v in sorted(cnt_dict.items(), key=lambda item: item[0])}
     fig = plt.figure(figsize = figsize)
     plt.plot(list(cnt_dict.keys()), list(cnt_dict.values()))
+    plt.xlabel('Scores')
+    plt.ylabel('Number of images')
+    plt.title('Score distribution')
     plt.savefig(os.path.join(output_path, f'distribution.png'))
     plt.close(fig)
 
