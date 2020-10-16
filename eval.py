@@ -29,6 +29,19 @@ def visualize_test(model, bi, gts, imgs, scores, batch_idx, output_path):
         plt.savefig(os.path.join(output_path, f'batch{batch_idx}_{idx}.png'))
         plt.close(fig)
    
+def plot_score(scores_list, output_path, figsize = (15,15)):
+    cnt_dict = {}
+    for score in scores_list:
+        if int(score) not in cnt_dict.keys():
+            cnt_dict[int(score)] = 1
+        else:
+            cnt_dict[int(score)] += 1
+    
+    cnt_dict = {k: v for k, v in sorted(cnt_dict.items(), key=lambda item: item[0])}
+    fig = plt.figure(figsize = figsize)
+    plt.plot(list(cnt_dict.keys()), list(cnt_dict.values()))
+    plt.savefig(os.path.join(output_path, f'distribution.png'))
+    plt.close(fig)
 
 
 def eval(args):
@@ -66,13 +79,18 @@ def eval(args):
         for param in bi.parameters():
             param.requires_grad = False
         
+
+        scores_list = []
+
+
         with torch.no_grad():
             for idx, batch in enumerate(tqdm(valloader)):
                 inputs = batch['imgs'].to(device)
                 outputs, scores = model(inputs)
+                scores_list += scores.cpu().numpy().reshape(-1).tolist()
                 visualize_test(model, bi, inputs, outputs, scores, idx, output_path)
-    
-    
+                
+        plot_score(scores_list, output_path)
     
   
 if __name__ == "__main__":
