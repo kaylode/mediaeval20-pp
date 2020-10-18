@@ -77,6 +77,9 @@ def attack(args, config):
         img_variable = Variable(image_tensor, requires_grad=True).to(device)
         img_variable.data = image_tensor
         
+        if config.brute_force:
+            num_steps = config.max_steps
+
         for i in range(num_steps):
             zero_gradients(img_variable)
             output = model(img_variable)
@@ -89,6 +92,13 @@ def attack(args, config):
             total_grad = torch.clamp(total_grad, -epsilon, epsilon)
             x_adv = image_tensor + total_grad
             img_variable.data = x_adv
+            if config.brute_force:
+                if i % (config.max_steps/3) == 0:
+                    epsilon *= 3
+                score_adv = model(img_variable).cpu().detach().item()
+                if score_adv <= config.max_score:
+                    break
+                    
 
         score_adv = model(img_variable).cpu().detach().numpy()
         score_ori = model(image_tensor_ori).cpu().detach().numpy()
