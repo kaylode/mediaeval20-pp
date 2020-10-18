@@ -3,6 +3,6 @@ settings:
   num_steps: 20
   alpha: 0.05
   attack_label: 0
-  brute_force: False
-  max_steps: 20
-  max_score: 0
+  brute_force: True
+  max_steps: 50
+  max_score: 30
