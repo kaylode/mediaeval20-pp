@@ -20,8 +20,9 @@ def denormalize(img, mean = [0.5, 0.5, 0.5], std = [0.5, 0.5, 0.5]):
 
 
 class ImageFolder(data.Dataset):
-    def __init__(self, path):
+    def __init__(self, path, enhance_path = None):
         self.path = path
+        self.enhance_path = enhance_path if enhance_path is not None else path
         self.transforms = TF.Compose([
             TF.CenterCrop((384, 512)),
             TF.ToTensor(),
@@ -31,16 +32,17 @@ class ImageFolder(data.Dataset):
         self.load_data()
         
     def load_data(self):
-        self.fns = [os.path.join(self.path, i) for i in os.listdir(self.path)]
+        self.fns = [(os.path.join(self.path, i), os.path.join(self.enhance_path, i)) for i in os.listdir(self.path)]
         
     def __getitem__(self, idx):
         item = self.fns[idx]
-        img = Image.open(item).convert('RGB')
+        img = Image.open(item[0]).convert('RGB')
+        label = Image.open(item[1]).convert('RGB')
         
         if self.transforms is not None:
             img = self.transforms(img)
+            label = self.transforms(label)
 
-        label = img.detach().clone()
         return {'img': img, 'label': label}
     
     def visualize_item(self, index = None, figsize=(15,15)):
