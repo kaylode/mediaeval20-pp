@@ -6,8 +6,8 @@ torch.backends.cudnn.benchmark = True
 
 def train(args):
     assert args.reconstruction_loss in ['ssim', 'msssim'], 'wrong reconstruction loss'
-    trainset = ImageFolder(os.path.join(args.path, 'pp2020_dev'))
-    valset = ImageFolder(os.path.join(args.path, 'pp2020_test'))
+    trainset = ImageFolder(os.path.join(args.path, 'pp2020_dev'), os.path.join(args.path,'enhance', 'pp2020_dev'))
+    valset = ImageFolder(os.path.join(args.path, 'pp2020_test'), os.path.join(args.path,'enhance', 'pp2020_test'))
     print(trainset)
     print(valset)
 

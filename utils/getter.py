@@ -3,7 +3,7 @@ from models import *
 from trainer import *
 from augmentations import *
 from loggers import *
-
+from config import *
 
 
 import torch
