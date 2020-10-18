@@ -94,7 +94,7 @@ def attack(args, config):
             img_variable.data = x_adv
             if config.brute_force:
                 if i % (config.max_steps/3) == 0:
-                    epsilon *= 3
+                    epsilon *= 2
                 score_adv = model(img_variable).cpu().detach().item()
                 if score_adv <= config.max_score:
                     epsilon = config.epsilon
