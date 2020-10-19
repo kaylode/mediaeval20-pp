@@ -54,7 +54,7 @@ python eval.py --images=<input path to image folder:output path> --pretrained=<p
 python fgsm.py  --config=<path to yaml config> --images=<input path to image folder:output path> --enhance=<path to enhanced labels>
 ```
 
-***To enhance image using PIL.ImageEnhance ***
+***To enhance image using PIL.ImageEnhance***
 ```
 cd utils
 python enhance.py  --images=<input path to image folder:output path>
