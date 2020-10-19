@@ -31,11 +31,11 @@ this repo
 <img src="./images/pipeline.PNG" width="700">
 
 ## Dataset:
-- Pixel privacy 2020 dataset (Koniq-10k): https://drive.google.com/file/d/1aYyZW4bcGSsRouRuo4HrNg37wFJQp1Bx/view?usp=sharing
-- Enhanced labels (of above dataset): https://drive.google.com/file/d/1BefYNHFxFim5tT_V7dP5Cxo8-eDrZNlU/view?usp=sharing
+- Pixel privacy 2020 dataset (Koniq-10k): [link](https://drive.google.com/file/d/1aYyZW4bcGSsRouRuo4HrNg37wFJQp1Bx/view?usp=sharing)
+- Enhanced labels (of above dataset): [link](https://drive.google.com/file/d/1BefYNHFxFim5tT_V7dP5Cxo8-eDrZNlU/view?usp=sharing)
 
 ## Pretrained weights:
-- BIQA checkpoint: https://drive.google.com/file/d/1t8nOxtM4tQhOOQZmYZ1O1ltbywLSAaXe/view?usp=sharing
+- BIQA checkpoint: [link](https://drive.google.com/file/d/1t8nOxtM4tQhOOQZmYZ1O1ltbywLSAaXe/view?usp=sharing)
 
 ## Train full model on enhanced labels:
 
@@ -52,6 +52,12 @@ python eval.py --images=<input path to image folder:output path> --pretrained=<p
 ***Using FGSM***
 ```
 python fgsm.py  --config=<path to yaml config> --images=<input path to image folder:output path> --enhance=<path to enhanced labels>
+```
+
+***To enhance image using PIL.ImageEnhance ***
+```
+cd utils
+python enhance.py  --images=<input path to image folder:output path>
 ```
 
 ## References:
