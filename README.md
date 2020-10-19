@@ -44,17 +44,17 @@ python train.py --path=<path to dataset> --batch_size=<size> --num_epochs=<epoch
 ```
 
 ## Inference:
-***Using U-Net model***
+- ***Using U-Net model***
 ```
 python eval.py --images=<input path to image folder:output path> --pretrained=<path to trained network weight>
 ```
 
-***Using FGSM***
+- ***Using FGSM***
 ```
 python fgsm.py  --config=<path to yaml config> --images=<input path to image folder:output path> --enhance=<path to enhanced labels>
 ```
 
-***To enhance image using PIL.ImageEnhance***
+- ***To enhance image using PIL.ImageEnhance***
 ```
 cd utils
 python enhance.py  --images=<input path to image folder:output path>
