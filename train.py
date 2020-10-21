@@ -69,7 +69,7 @@ if __name__ == "__main__":
     parser.add_argument('--hard_label', type=float, default= 0,
                         help='hard code label to attack')
     parser.add_argument('--reconstruction_loss', type=str, default= 'ssim',
-                        help='reconstruction loss, ssim or msssim')
+                        help='reconstruction loss, ssim or msssim or mse or ssim_only')
     args = parser.parse_args()        
     train(args)
     
