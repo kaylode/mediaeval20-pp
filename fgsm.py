@@ -5,19 +5,24 @@ import matplotlib.pyplot as plt
 from torch.autograd import Variable
 from torch.autograd.gradcheck import zero_gradients
 from torchvision import transforms
+from PIL import Image
 
 torch.backends.cudnn.fastest = True
 torch.backends.cudnn.benchmark = True
 
-def visualize(x_ori, x_adv, ori_pred, adv_pred, output_path, idx):
+def visualize(x_ori, x_adv, ori_pred, adv_pred, output_path, idx, debug):
     
     adv_score = np.round(adv_pred[0][0], 5)
     ori_score = np.round(ori_pred[0][0], 5)
     x_adv = denormalize(x_adv.cpu().squeeze(0))
     x_ori = denormalize(x_ori.cpu().squeeze(0))
     
+
+    if debug:
+        Image.fromarray((x_adv*255).astype(np.uint8)).save(os.path.join(output_path, f'[{adv_score}]_{idx}.png'))
+        return
+
     fig = plt.figure(figsize=(15,15))
-    
     plt.subplot(1,2,1)
     plt.imshow(x_ori)
     plt.title(ori_score)
@@ -30,8 +35,11 @@ def visualize(x_ori, x_adv, ori_pred, adv_pred, output_path, idx):
     plt.axis('off')
     plt.savefig(os.path.join(output_path, f'[{adv_score}]_{idx}.png'))
     plt.close(fig)
+
+
     
-   
+
+
 def plot_score(scores_list, output_path, figsize = (15,15)):
     cnt_dict = {}
     for score in scores_list:
@@ -90,22 +98,21 @@ def attack(args, config):
             adv_temp = img_variable.data - x_grad
             total_grad = adv_temp - image_tensor
             total_grad = torch.clamp(total_grad, -epsilon, epsilon)
-            x_adv = image_tensor + total_grad
-            img_variable.data = x_adv
+            img_variable.data = image_tensor + total_grad
             if config.brute_force:
-                if i % (config.max_steps/3) == 0:
-                    epsilon *= 2
+                if i % int(config.max_steps/5) == 0:
+                    epsilon += 0.05
                 score_adv = model(img_variable).cpu().detach().item()
                 if score_adv <= config.max_score:
                     epsilon = config.epsilon
                     break
                     
-
-        score_adv = model(img_variable).cpu().detach().numpy()
-        score_ori = model(image_tensor_ori).cpu().detach().numpy()
+        with torch.no_grad():
+            score_adv = model(img_variable).cpu().detach().numpy()
+            score_ori = model(image_tensor_ori).cpu().detach().numpy()
 
         scores_list += score_adv.reshape(-1).tolist()
-        visualize(image_tensor_ori, img_variable.data, score_ori, score_adv, output_path, str(idx).zfill(5))
+        visualize(image_tensor_ori, img_variable.data, score_ori, score_adv, output_path, str(idx).zfill(5), args.debug)
     plot_score(scores_list, output_path)
 
 if __name__ == "__main__":

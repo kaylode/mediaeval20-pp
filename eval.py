@@ -1,11 +1,13 @@
 from utils.getter import *
 import argparse
-from models.BIQA_model.biqa import model_qa
+from models.BIQA_model.biqa import BIQA
 import matplotlib.pyplot as plt
+from PIL import Image
+
 torch.backends.cudnn.fastest = True
 torch.backends.cudnn.benchmark = True
 
-def visualize_test(model, bi, gts, imgs, scores, batch_idx, output_path):
+def visualize_test(model, bi, gts, imgs, scores, batch_idx, output_path, debug):
 
     gts = torch.stack([i for i in gts]).to(imgs.device)
 
@@ -17,7 +19,10 @@ def visualize_test(model, bi, gts, imgs, scores, batch_idx, output_path):
         img_show = denormalize(gt.detach().cpu())
         img_show2 = denormalize(pred.detach().cpu())
         score = np.round(pred_score[0], 4)
-        fig = plt.figure(figsize=(8,8))
+        #fig = plt.figure(figsize=(8,8))
+        if debug:
+            Image.fromarray(img_show2).save(os.path.join(output_path, f'[{score}]_batch{batch_idx}_{idx}.png'))
+            return None
         plt.subplot(1,2,1)
         plt.title(gt_score[0])
         plt.axis('off')
@@ -76,22 +81,19 @@ def eval(args):
         model.eval()
         model.inference()
         
-        bi = model_qa(num_classes=1).to(device)
-        bi.load_state_dict(torch.load('/content/drive/My Drive/datasets/Pixel Privacy 2020/KonCept512.pth'))
-        bi.eval()
+        bi = BIQA.to(device)
+
         for param in bi.parameters():
             param.requires_grad = False
         
-
         scores_list = []
-
 
         with torch.no_grad():
             for idx, batch in enumerate(tqdm(valloader)):
                 inputs = batch['imgs'].to(device)
                 outputs, scores = model(inputs)
                 scores_list += scores.cpu().numpy().reshape(-1).tolist()
-                visualize_test(model, bi, inputs, outputs, scores, idx, output_path)
+                visualize_test(model, bi, inputs, outputs, scores, idx, output_path, args.debug)
                 
         plot_score(scores_list, output_path)
     
@@ -103,9 +105,11 @@ if __name__ == "__main__":
                         help='path to image folder')
     parser.add_argument('--cuda', type=bool, default=True,
                         help='Using GPU')
+    parser.add_argument('--debug', action='store_true',
+                        help='checkpoint to resume')
     parser.add_argument('--pretrained', type=str, default= None,
                         help='checkpoint to resume')
 
-    args = parser.parse_args()        
+    args = parser.parse_args()
     eval(args)
     
