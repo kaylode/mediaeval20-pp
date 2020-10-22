@@ -10,30 +10,33 @@ from PIL import Image
 torch.backends.cudnn.fastest = True
 torch.backends.cudnn.benchmark = True
 
-def visualize(x_ori, x_adv, ori_pred, adv_pred, output_path, idx, debug):
+def visualize(x_adv, ori_pred, adv_pred, img_path, output_path, debug):
     
     adv_score = np.round(adv_pred[0][0], 5)
     ori_score = np.round(ori_pred[0][0], 5)
     x_adv = denormalize(x_adv.cpu().squeeze(0))
-    x_ori = denormalize(x_ori.cpu().squeeze(0))
+    x_ori = Image.open(img_path)
     
+    output_name = os.path.basename(img_path)
 
     if debug:
-        Image.fromarray((x_adv*255).astype(np.uint8)).save(os.path.join(output_path, f'[{adv_score}]_{idx}.png'))
+        Image.fromarray((x_adv*255).astype(np.uint8)).save(os.path.join(output_path, output_name))
         return
 
     fig = plt.figure(figsize=(15,15))
     plt.subplot(1,2,1)
     plt.imshow(x_ori)
     plt.title(ori_score)
+    plt.tight_layout()
     plt.axis('off')
     
     plt.subplot(1,2,2)
     plt.imshow(x_adv)
     plt.title(adv_score)
-    
+    plt.tight_layout()
     plt.axis('off')
-    plt.savefig(os.path.join(output_path, f'[{adv_score}]_{idx}.png'))
+    
+    plt.savefig(os.path.join(output_path, output_name))
     plt.close(fig)
 
 
@@ -111,8 +114,10 @@ def attack(args, config):
             score_adv = model(img_variable).cpu().detach().numpy()
             score_ori = model(image_tensor_ori).cpu().detach().numpy()
 
+        ori_paths = batch['img_paths']
+
         scores_list += score_adv.reshape(-1).tolist()
-        visualize(image_tensor_ori, img_variable.data, score_ori, score_adv, output_path, str(idx).zfill(5), args.debug)
+        visualize(img_variable.data, score_ori, score_adv, ori_paths[0], output_path, args.debug)
     plot_score(scores_list, output_path)
 
 if __name__ == "__main__":

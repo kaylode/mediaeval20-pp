@@ -43,7 +43,7 @@ class ImageFolder(data.Dataset):
             img = self.transforms(img)
             label = self.transforms(label)
 
-        return {'img': img, 'label': label}
+        return {'img': img, 'label': label, 'img_path': item[0], 'label_path': item[1]}
     
     def visualize_item(self, index = None, figsize=(15,15)):
         """
@@ -87,4 +87,6 @@ class ImageFolder(data.Dataset):
     def collate_fn(self, batch):
         imgs = torch.stack([i['img'] for i in batch])
         labels = torch.stack([i['label'] for i in batch])
-        return {'imgs': imgs, 'labels': labels}
+        img_paths = [i['img_path'] for i in batch]
+        label_paths = [i['label_path'] for i in batch]
+        return {'imgs': imgs, 'labels': labels, 'img_paths': img_paths, 'label_paths': label_paths}
