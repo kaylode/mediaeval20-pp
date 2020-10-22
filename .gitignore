@@ -8,3 +8,5 @@ datasets/__pycache__/image_classification.cpython-38.pyc
 *.pyc
 *.0
 *.pth
+*.jpg
+*.png
