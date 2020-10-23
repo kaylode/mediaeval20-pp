@@ -9,33 +9,40 @@ import pandas as pd
 torch.backends.cudnn.fastest = True
 torch.backends.cudnn.benchmark = True
 
-def visualize_test(bi, gts, imgs, scores, batch_idx, output_path, debug):
+def visualize_test(img_paths, enhanced_paths, compressed_paths, output_path, gt_scores, en_scores, com_scores,  debug):
+    for (i, j, compressed_show, gt_score, en_score, com_score)  in zip(img_paths, enhanced_paths, compressed_paths, gt_scores, en_scores, com_scores):
+        if isinstance(i, str):
+            img_name = os.path.basename(i)
+            img_show = Image.open(i)
+        else:
+            img_show = i
+        if isinstance(j, str):
+            enhanced_show = Image.open(j)
+        else:
+            enhanced_show = j
 
-    
-
-    
-    for idx, (gt, pred, gt_score, pred_score) in enumerate(zip(gts,imgs,gt_scores,pred_scores)):
-        img_show = denormalize(gt.detach().cpu())
-        img_show2 = denormalize(pred.detach().cpu())
-        score = np.round(pred_score[0], 4)
+        fig = plt.figure(figsize=(15,15))
         
-        if debug:
-            Image.fromarray(img_show2).save(os.path.join(output_path, f'[{score}]_batch{batch_idx}_{idx}.png'))
-            return None
-    
-        fig = plt.figure(figsize=(8,8))
-        plt.subplot(1,2,1)
-        plt.title(gt_score[0])
+        plt.subplot(1,3,1)
+        plt.title('Original: '+ str(gt_score))
         plt.axis('off')
         plt.imshow(img_show)
-        
-        plt.subplot(1,2,2)
-        plt.imshow(img_show2)
-        plt.title(score)
-        
+
+
+        plt.subplot(1,3,2)
+        plt.imshow(enhanced_show)
+        plt.title('Attacked: ' + str(en_score))
+
         plt.axis('off')
+
+        plt.subplot(1,3,3)
+        plt.imshow(compressed_show)
+        plt.title('Compressed 90: '+ str(com_score))
+
+        plt.axis('off')
+        
         fig.tight_layout()
-        plt.savefig(os.path.join(output_path, f'[{score}]_batch{batch_idx}_{idx}.png'))
+        plt.savefig(os.path.join(output_path, img_name))
         plt.close(fig)
    
 def plot_score(scores_list, output_path, figsize = (15,15)):
@@ -55,14 +62,17 @@ def plot_score(scores_list, output_path, figsize = (15,15)):
     plt.savefig(os.path.join(output_path, f'distribution.png'))
     plt.close(fig)
 
-def make_compression(label_paths, transforms):
-    out_path = 'results/compressed'
+def make_compression(label_paths, transforms , label_imgs = None):
+    out_path = '/content/drive/My Drive/results/compressed'
     if not os.path.exists(out_path):
         os.mkdir(out_path)
 
     compressed = []
-    for i in label_paths:
-        img = Image.open(i)
+    for idx, i in enumerate(label_paths):
+        if label_imgs is None:
+          img = Image.open(i)
+        else:
+          img = Image.fromarray((label_imgs[idx] * 255).astype(np.uint8))
         img_name = os.path.join(out_path, os.path.basename(i)[:-4]+'.jpeg')
         img.save(img_name, quality=90)
         img = Image.open(img_name)
@@ -115,20 +125,26 @@ def eval(args):
 
             with torch.no_grad():
                 for idx, batch in enumerate(tqdm(valloader)):
-                    inputs = batch['imgs'].to(device)
-                    compressed_shows = make_compression(batch['label_paths'], valset.transforms)
+                    inputs = batch['imgs'].to(device)   
                     outputs, en_scores = model(inputs)
-
+                    
                     en_scores = en_scores.detach().cpu().numpy()
-                    enhanced = denormalize(outputs.detach().cpu())
+
+                    enhanced = [denormalize(i) for i in outputs.detach().cpu()]
+                    compressed, compressed_shows = make_compression(batch['label_paths'], valset.transforms, label_imgs=enhanced)
+                    compressed = compressed.to(device)
 
                     gt_scores = bi(inputs).detach().cpu().numpy()
-                    com_scores = bi(outputs).detach().cpu().numpy()
+                    com_scores = bi(compressed).detach().cpu().numpy()
 
-                    scores_list += en_scores.cpu().numpy().reshape(-1).tolist()
+                    scores_list += en_scores.reshape(-1).tolist()
 
-                    visualize_test(batch['img_paths'], enhanced, compressed_shows, gt_scores, en_scores, com_scores, args.debug)
-                    
+                    visualize_test(batch['img_paths'], enhanced, compressed_shows, output_path, gt_scores, en_scores, com_scores, args.debug)
+
+            for i in os.listdir('/content/drive/My Drive/results/compressed'):
+                if i.endswith('.jpeg'):
+                    os.remove(os.path.join('/content/drive/My Drive/results/compressed', i))
+
             plot_score(scores_list, output_path)
 
         else:
@@ -153,40 +169,12 @@ def eval(args):
                     gt_scores = model(inputs).detach().cpu().numpy()
                     en_scores = model(enhanced).detach().cpu().numpy()
                     com_scores = model(compressed).detach().cpu().numpy()
-
-                    for (i, j, compressed_show, gt_score, en_score, com_score)  in zip(batch['img_paths'], batch['label_paths'], compressed_shows, gt_scores, en_scores, com_scores):
-                        img_name = os.path.basename(i)
-                        img_show = Image.open(i)
-                        enhanced_show = Image.open(j)
-
-                        fig = plt.figure(figsize=(15,15))
-                        
-                        
-
-                        plt.subplot(1,3,1)
-                        plt.title('Original: '+ str(gt_score))
-                        plt.axis('off')
-                        plt.imshow(img_show)
-      
-
-                        plt.subplot(1,3,2)
-                        plt.imshow(enhanced_show)
-                        plt.title('Attacked: ' + str(en_score))
-          
-                        plt.axis('off')
-
-                        plt.subplot(1,3,3)
-                        plt.imshow(compressed_show)
-                        plt.title('Compressed 90: '+ str(com_score))
-            
-                        plt.axis('off')
-                        
-                        fig.tight_layout()
-                        plt.savefig(os.path.join(output_path, img_name))
-                        plt.close(fig)
-            for i in os.listdir('results/compressed'):
+                    visualize_test(batch['img_paths'], batch['label_paths'], compressed_shows, output_path, gt_scores, en_scores, com_scores,  debug)
+                    
+            for i in os.listdir('/content/drive/My Drive/results/compressed'):
                 if i.endswith('.jpeg'):
-                    os.remove(os.path.join('results/compressed', i))
+                    os.remove(os.path.join('/content/drive/My Drive/results/compressed', i))
+                    
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Training on Koniq-10k')
