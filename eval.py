@@ -11,10 +11,7 @@ torch.backends.cudnn.benchmark = True
 
 def visualize_test(bi, gts, imgs, scores, batch_idx, output_path, debug):
 
-    gts = torch.stack([i for i in gts]).to(imgs.device)
-
-    gt_scores = bi(gts).cpu().numpy()
-    pred_scores = bi(imgs).detach().cpu().numpy()
+    
 
     
     for idx, (gt, pred, gt_score, pred_score) in enumerate(zip(gts,imgs,gt_scores,pred_scores)):
@@ -31,12 +28,13 @@ def visualize_test(bi, gts, imgs, scores, batch_idx, output_path, debug):
         plt.title(gt_score[0])
         plt.axis('off')
         plt.imshow(img_show)
-        plt.tight_layout()
+        
         plt.subplot(1,2,2)
         plt.imshow(img_show2)
         plt.title(score)
-        plt.tight_layout()
+        
         plt.axis('off')
+        fig.tight_layout()
         plt.savefig(os.path.join(output_path, f'[{score}]_batch{batch_idx}_{idx}.png'))
         plt.close(fig)
    
@@ -118,9 +116,18 @@ def eval(args):
             with torch.no_grad():
                 for idx, batch in enumerate(tqdm(valloader)):
                     inputs = batch['imgs'].to(device)
-                    outputs, scores = model(inputs)
-                    scores_list += scores.cpu().numpy().reshape(-1).tolist()
-                    visualize_test(bi, inputs, outputs, scores, idx, output_path, args.debug)
+                    compressed_shows = make_compression(batch['label_paths'], valset.transforms)
+                    outputs, en_scores = model(inputs)
+
+                    en_scores = en_scores.detach().cpu().numpy()
+                    enhanced = denormalize(outputs.detach().cpu())
+
+                    gt_scores = bi(inputs).detach().cpu().numpy()
+                    com_scores = bi(outputs).detach().cpu().numpy()
+
+                    scores_list += en_scores.cpu().numpy().reshape(-1).tolist()
+
+                    visualize_test(batch['img_paths'], enhanced, compressed_shows, gt_scores, en_scores, com_scores, args.debug)
                     
             plot_score(scores_list, output_path)
 
