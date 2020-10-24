@@ -81,9 +81,6 @@ def make_compression(label_paths, transforms , label_imgs = None):
     batch = torch.stack([transforms(i) for i in compressed])
     return batch, compressed
 
-
-
-
 def eval(args):
     device = torch.device("cuda" if args.cuda else "cpu")
     
@@ -92,8 +89,6 @@ def eval(args):
         
         if not os.path.exists(output_path):
             os.mkdir(output_path)       
-
-
 
         if args.pretrained is not None and args.generated is None:
             valset = ImageFolder(input_path)
@@ -157,6 +152,8 @@ def eval(args):
     
             model = BIQA().to(device)
 
+            scores_list = []
+
             for param in model.parameters():
                 param.requires_grad = False
 
@@ -168,12 +165,15 @@ def eval(args):
                     compressed = compressed.to(device)
                     gt_scores = model(inputs).detach().cpu().numpy()
                     en_scores = model(enhanced).detach().cpu().numpy()
-                    com_scores = model(compressed).detach().cpu().numpy()
+                    com_scores = model(compressed).detach().cpu().numpy() 
+                    scores_list += com_scores.reshape(-1).tolist()
                     visualize_test(batch['img_paths'], batch['label_paths'], compressed_shows, output_path, gt_scores, en_scores, com_scores,  debug)
                     
             for i in os.listdir('/content/drive/My Drive/results/compressed'):
                 if i.endswith('.jpeg'):
                     os.remove(os.path.join('/content/drive/My Drive/results/compressed', i))
+            
+            plot_score(scores_list, output_path)
                     
 if __name__ == "__main__":
 
