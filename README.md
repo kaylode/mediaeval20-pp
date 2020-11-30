@@ -38,15 +38,14 @@ this repo
 - BIQA checkpoint: [link](https://drive.google.com/file/d/1t8nOxtM4tQhOOQZmYZ1O1ltbywLSAaXe/view?usp=sharing)
 
 # Image-to-Image:
-
-## Train full U-Net model:
+- ***Train full U-Net model***:
 ```
 python train.py --path=<path to dataset> \
                 --batch_size=<size> \
                 --num_epochs=<epochs> \
                 --resume=<path to checkpoint>
 ```
-## Inference using U-Net:
+- ***Inference using U-Net***:
 ```
 python eval.py --images=<input path to image folder:output path> \ 
                --pretrained=<path to trained network weight>
