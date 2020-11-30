@@ -41,11 +41,15 @@ this repo
 
 ## Train full U-Net model:
 ```
-python train.py --path=<path to dataset> --batch_size=<size> --num_epochs=<epochs> --resume=<path to checkpoint>
+python train.py --path=<path to dataset> \
+                --batch_size=<size> \
+                --num_epochs=<epochs> \
+                --resume=<path to checkpoint>
 ```
 ## Inference using U-Net:
 ```
-python eval.py --images=<input path to image folder:output path> --pretrained=<path to trained network weight>
+python eval.py --images=<input path to image folder:output path> \ 
+               --pretrained=<path to trained network weight>
 ```
 
 # Two-stage approaches:
@@ -66,8 +70,8 @@ python enhance.py  --images=<input path to image folder:output path>
 Methods | Accuracy (after JPEG 90) | Number of times selected as “Best” 
 --- | --- | ---
 ***HCMUS_Team_run1_enlightment_gan_JPEG90*** | ***0.00*** | ***84***
-HCMUS_Team_run3_unet_mse_enhance_JPEG90 | 13.27 | 11
 HCMUS_Team_run2_fgsm_pillow_JPEG90 | 48.18 | 60
+HCMUS_Team_run3_unet_mse_enhance_JPEG90 | 13.27 | 11
 HCMUS_Team_run4_cartoon_attack_JPEG90 | 1.27 | 34
 HCMUS_Team_run5_retouch_JPEG90 | 0.18 | 34
 
