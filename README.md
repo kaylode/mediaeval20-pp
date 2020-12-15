@@ -74,6 +74,14 @@ HCMUS_Team_run3_unet_mse_enhance_JPEG90 | 13.27 | 11
 HCMUS_Team_run4_cartoon_attack_JPEG90 | 1.27 | 34
 HCMUS_Team_run5_retouch_JPEG90 | 0.18 | 34
 
+# Leaderboard:
+<img src="./images/leaderboard.png" width="700">
+
+<img src="./images/leadereboard_2.png" width="700">
+
+# Working notes:
+
+[HCMUS at Pixel Privacy 2020: Quality Camouflage with Back Propagation and Image Enhancement](./images/_Pixel_Privacy___2020___HCMUS_.pdf)
 
 # References:
 - SSIM Loss: https://github.com/Po-Hsun-Su/pytorch-ssim
